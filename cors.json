@@ -1,6 +1,6 @@
 [
     {
-      "origin": ["*"],
+      "origin": ["http://34.95.181.184"],
       "responseHeader": ["Content-Type", "Authorization"],
       "method": ["GET", "HEAD", "PUT", "POST", "DELETE"],
       "maxAgeSeconds": 3600
