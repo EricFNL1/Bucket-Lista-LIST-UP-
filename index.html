@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Upload e Visualização de Imagens</title>
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+  <link rel="shortcut icon" href="682665_favicon_google_logo_new_icon.ico" type="image/x-icon">
+  <style>
+    body {
+      background: #f8f9fa;
+    }
+    /* Garante que as imagens dos cards tenham uma altura uniforme */
+    .card-img-top {
+      object-fit: cover;
+      height: 200px;
+    }
+    /* Estilo personalizado para a seção de upload */
+    .upload-section {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand" href="index.html" target="_self"><img src="7123014_cloud_google_icon.png" alt="GCS Uploader" width="60px"></a>
+    </div>
+  </nav>
+  
+  <!-- Header -->
+  <div class="container my-5">
+    <div class="p-5 mb-4 bg-light rounded-3 shadow-sm">
+      <div class="container-fluid py-5">
+        <h1 class="display-5 fw-bold">Upload e Visualização de Imagens</h1>
+        <p class="col-md-8 fs-4">Faça upload das suas imagens para o Google Cloud Storage e visualize-as em nossa galeria.</p>
+      </div>
+    </div>
+
+    <!-- Seção de Upload -->
+    <div class="upload-section mb-5">
+      <h2 class="mb-3">Envie sua Imagem</h2>
+      <form id="upload-form">
+        <div class="mb-3">
+          <input type="file" class="form-control" id="file-input" />
+        </div>
+        <button type="submit" class="btn btn-success">Fazer Upload</button>
+      </form>
+      <div id="status" class="mt-3"></div>
+    </div>
+    
+    <!-- Galeria de Imagens -->
+    <div>
+      <h2 class="mb-3">Galeria de Imagens</h2>
+      <div id="image-container" class="row g-4">
+        <!-- Cards de imagens serão inseridos aqui -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // Função para carregar e exibir as imagens
+    function loadImages() {
+      fetch('list-images.php')
+        .then(response => response.json())
+        .then(data => {
+          const container = document.getElementById('image-container');
+          container.innerHTML = ''; // Limpa imagens anteriores
+
+          data.images.forEach(item => {
+            // Cria a coluna responsiva
+            const col = document.createElement('div');
+            col.classList.add('col-lg-3', 'col-md-4', 'col-sm-6');
+
+            // Cria o card
+            const cardDiv = document.createElement('div');
+            cardDiv.classList.add('card', 'h-100', 'shadow-sm');
+
+            // Imagem do card
+            const img = document.createElement('img');
+            img.src = item.url;
+            img.alt = item.name;
+            img.classList.add('card-img-top');
+
+            // Corpo do card
+            const cardBody = document.createElement('div');
+            cardBody.classList.add('card-body');
+
+            // Título do card
+            const cardTitle = document.createElement('h5');
+            cardTitle.classList.add('card-title');
+            cardTitle.textContent = item.name;
+
+            // Monta o card
+            cardBody.appendChild(cardTitle);
+            cardDiv.appendChild(img);
+            cardDiv.appendChild(cardBody);
+            col.appendChild(cardDiv);
+            container.appendChild(col);
+          });
+        })
+        .catch(error => {
+          console.error('Erro ao carregar imagens:', error);
+        });
+    }
+
+    // Ao enviar o formulário de upload
+    document.getElementById('upload-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fileInput = document.getElementById('file-input');
+
+      if (!fileInput.files.length) {
+        alert('Selecione um arquivo para fazer upload.');
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const fileName = file.name;
+      const contentType = file.type;
+
+      try {
+        // 1) Solicita URL assinada para upload
+        const response = await fetch(`get-signed-url.php?fileName=${encodeURIComponent(fileName)}&contentType=${encodeURIComponent(contentType)}`);
+        const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        // 2) Faz o upload do arquivo para a URL assinada
+        const uploadResponse = await fetch(data.url, {
+          method: 'PUT',
+          headers: { 'Content-Type': contentType },
+          body: file
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error('Erro no upload: ' + uploadResponse.statusText);
+        }
+
+        document.getElementById('status').innerHTML = '<div class="alert alert-success" role="alert">Upload concluído com sucesso!</div>';
+        loadImages();
+      } catch (error) {
+        document.getElementById('status').innerHTML = `<div class="alert alert-danger" role="alert">Erro ao fazer upload: ${error.message}</div>`;
+      }
+    });
+
+    // Carrega a galeria ao iniciar a página
+    loadImages();
+  </script>
+</body>
+</html>
