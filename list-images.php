@@ -10,8 +10,9 @@ $bucketName = 'aula-apresentacao';
 
 $storage = new StorageClient([
     'projectId'   => $projectId,
-    'keyFilePath' => $keyFilePath,
+    'keyFilePath' => '/var/www/html/Bucket-Lista-LIST-UP-/service-account.json'
 ]);
+
 
 $bucket = $storage->bucket($bucketName);
 
