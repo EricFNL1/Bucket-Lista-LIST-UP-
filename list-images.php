@@ -11,7 +11,7 @@ $keyFilePath = __DIR__ . '/service-account.json';
 $bucketName = 'aula-apresentacao';
 
 $storage = new StorageClient([
-    'projectId'   => 'SEU_PROJECT_ID',
+    'projectId'   => 'absolute-brook-452223-g6',
     'keyFilePath' => __DIR__ . '/service-account.json'
 ]);
 

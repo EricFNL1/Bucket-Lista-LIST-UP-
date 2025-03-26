@@ -12,7 +12,7 @@ $bucketName = 'aula-apresentacao';
 
 // Instancia o cliente do Storage
 $storage = new StorageClient([
-    'projectId'   => 'SEU_PROJECT_ID',
+    'projectId'   => 'absolute-brook-452223-g6',
     'keyFilePath' => __DIR__ . '/service-account.json'
 ]);
 
